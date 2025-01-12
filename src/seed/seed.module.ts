@@ -1,10 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
+import { SeedService } from './seed.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductModule } from './product/product.module';
-
+import { Product } from 'src/product/entities/product.entity';
 
 @Module({
   imports: [
@@ -15,12 +12,12 @@ import { ProductModule } from './product/product.module';
       username: 'postgres',
       password: 'postgresPass',
       database: 'smart_search',
-      entities: [],
+      entities: [Product],
       synchronize: true,
     }),
-    ProductModule,
+    TypeOrmModule.forFeature([Product]),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [SeedService],
 })
-export class AppModule {}
+export class SeedModule {}
