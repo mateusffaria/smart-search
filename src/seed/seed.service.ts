@@ -17,7 +17,7 @@ export class SeedService {
     redable.pipe(split2(JSON.parse)).on('data', async (data) => {
       await this.productRepository.save({
         average_rating: data.average_rating,
-        description: data.description,
+        description: data.description.toString(),
         title: data.title,
       });
     });
