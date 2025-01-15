@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'products' })
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id?: string;
@@ -13,4 +13,7 @@ export class Product {
 
   @Column({ scale: 2, type: 'float' })
   average_rating: number;
+
+  @Column({ scale: 4, type: 'float', nullable: true })
+  price: number;
 }

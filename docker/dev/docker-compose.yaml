@@ -1,34 +1,75 @@
 services:
-    postgres:
-        image: postgres:17
-        environment:
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgresPass
-        volumes:
-            - postgres-db-volume:/var/lib/postgresql/data
-        ports:
-            - 5432:5432
-        networks:
-            - postgres-db-network
-    pgadmin:
-        image: dpage/pgadmin4
-        environment:
-            PGADMIN_DEFAULT_EMAIL: 'teste@teste.com'
-            PGADMIN_DEFAULT_PASSWORD: 'teste'
-        ports:
-            - 16543:80
-        volumes:
-            - ./servers.json:/pgadmin4/servers.json
-        networks:
-            - postgres-db-network
+  postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresPass
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - postgres-db-network
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 'teste@teste.com'
+      PGADMIN_DEFAULT_PASSWORD: 'teste'
+    ports:
+      - 16543:80
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+    networks:
+      - postgres-db-network
+  elasticsearch:
+    image: elasticsearch:8.17.0
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    environment:
+      discovery.type: 'single-node'
+      ES_JAVA_OPTS: '-Xms2g -Xmx2g'
+    volumes:
+      - ./esdata:/usr/share/elasticsearch/data
+    networks:
+      - postgres-db-network
+
+  kibana:
+    image: kibana:8.17.0
+    ports:
+      - '5601:5601'
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - postgres-db-network
+
+  logstash:
+    image: logstash:8.17.0
+    environment:
+      - LS_JAVA_OPTS=-Xmx7g -Xms7g
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - '5044:5044'
+    volumes:
+      - ./logstash/config:/usr/share/logstash/config
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    networks:
+      - postgres-db-network
+    depends_on:
+      - postgres
+      - elasticsearch
 
 volumes:
-    postgres-db-volume:
-        driver: local
-        driver_opts:
-            type: none
-            o: bind
-            device: ./data
+  postgres-db-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data
+  esdata:
+    driver: local
 networks:
-    postgres-db-network:
-        driver: bridge
+  postgres-db-network:
+    driver: bridge
