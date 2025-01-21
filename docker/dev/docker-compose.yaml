@@ -22,20 +22,20 @@ services:
     networks:
       - postgres-db-network
   elasticsearch:
-    image: elasticsearch:8.17.0
+    image: elasticsearch:7.17.0
     ports:
       - '9200:9200'
       - '9300:9300'
     environment:
       discovery.type: 'single-node'
-      ES_JAVA_OPTS: '-Xms2g -Xmx2g'
+      ES_JAVA_OPTS: '-Xms3g -Xmx3g'
     volumes:
       - ./esdata:/usr/share/elasticsearch/data
     networks:
       - postgres-db-network
 
   kibana:
-    image: kibana:8.17.0
+    image: kibana:7.17.0
     ports:
       - '5601:5601'
     environment:
@@ -46,7 +46,7 @@ services:
       - postgres-db-network
 
   logstash:
-    image: logstash:8.17.0
+    image: logstash:7.17.0
     environment:
       - LS_JAVA_OPTS=-Xmx7g -Xms7g
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200

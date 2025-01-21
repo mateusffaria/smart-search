@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createReadStream } from 'node:fs';
 import { Readable, Transform } from 'node:stream';
@@ -12,6 +13,7 @@ export class SeedService {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    private readonly elasticsearchService: ElasticsearchService,
   ) {}
   async populateSeed() {
     const redable = createReadStream('C:\\Users\\mateu\\Downloads\\meta_Automotive.jsonl');
@@ -84,5 +86,52 @@ export class SeedService {
 
     // Inicia o processamento do arquivo
     processStream();
+  }
+
+  async populateIndex() {
+    const selectStream = await this.productRepository.createQueryBuilder().select().stream();
+
+    const elasticsearchService = this.elasticsearchService;
+
+    const t = new Transform({
+      objectMode: true,
+      transform(chunk, encoding, callback) {
+        elasticsearchService
+          .index({
+            index: 'postgres-data-2',
+            document: {
+              id: chunk.Product_id,
+              title: chunk.title,
+              description: chunk.description,
+              average_rating: chunk.average_rating,
+              price: chunk.price,
+            },
+          })
+          .catch((err) => console.error(err));
+
+        callback();
+      },
+    });
+
+    console.log('called');
+
+    selectStream.pipe(t);
+
+    selectStream.on('data', (data: any) => {
+      // console.log({ data });
+      // const res = JSON.parse(data as string);
+      // this.elasticsearchService.index({
+      //   index: 'postgres-data-2',
+      //   document: {
+      //     id: data.Product_id,
+      //     title: data.title,
+      //     description: data.description,
+      //     average_rating: data.average_rating,
+      //     price: data.price,
+      //   },
+      // });
+    });
+
+    return 'populateIndex';
   }
 }

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { SeedService } from './seed.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from 'src/product/entities/product.entity';
+import { ElasticsearchModule } from '@nestjs/elasticsearch';
 
 @Module({
   imports: [
@@ -16,6 +17,9 @@ import { Product } from 'src/product/entities/product.entity';
       synchronize: true,
     }),
     TypeOrmModule.forFeature([Product]),
+    ElasticsearchModule.register({
+      node: 'http://localhost:9200',
+    }),
   ],
   controllers: [],
   providers: [SeedService],
