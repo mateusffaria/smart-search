@@ -45,22 +45,6 @@ services:
     networks:
       - postgres-db-network
 
-  logstash:
-    image: logstash:7.17.0
-    environment:
-      - LS_JAVA_OPTS=-Xmx7g -Xms7g
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - '5044:5044'
-    volumes:
-      - ./logstash/config:/usr/share/logstash/config
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-    networks:
-      - postgres-db-network
-    depends_on:
-      - postgres
-      - elasticsearch
-
 volumes:
   postgres-db-volume:
     driver: local

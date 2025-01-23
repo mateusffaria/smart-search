@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductModule } from './product/product.module';
-
+import { Product } from './product/entities/product.entity';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { ProductModule } from './product/product.module';
       username: 'postgres',
       password: 'postgresPass',
       database: 'smart_search',
-      entities: [],
+      entities: [Product],
       synchronize: true,
     }),
     ProductModule,
